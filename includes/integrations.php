@@ -10,4 +10,15 @@ namespace Zao\WooCommerce\AttachFile;
  */
 class Integrations {
 
+    /**
+	 * Base plugin class.
+	 *
+	 * @var    WooCommerce_Attach_File_To_Order
+	 * @since  0.0.0
+	 */
+    protected $base = null;
+
+    public function __construct( $base ) {
+        $this->base = $base;
+    }
 }
