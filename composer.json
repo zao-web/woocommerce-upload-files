@@ -1,0 +1,21 @@
+{
+	"name": "woocommerce-attach-file-to-order",
+	"description": "A radical new plugin for WordPress!",
+	"keywords": ["wordpress", "plugin", "generator-plugin-wp"],
+	"homepage": "https://zao.is",
+	"license": "MIT",
+	"authors": [
+	{
+		"name": "Zao",
+		"homepage": "https://zao.is"
+	}
+	],
+	"minimum-stability": "dev",
+	"type": "wordpress-plugin",
+	"autoload": {
+		"classmap": ["woocommerce-attach-file-to-order.php", "includes/"]
+	},
+	"require": {
+		"kunalvarma05/dropbox-php-sdk": "dev-master"
+	}
+}

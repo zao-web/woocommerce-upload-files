@@ -1,0 +1,18 @@
+{
+  "name": "woocommerce-attach-file-to-order",
+  "description": "A radical new plugin for WordPress!",
+  "license": "MIT",
+  "authors": [
+    "Zao"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+  }
+}
