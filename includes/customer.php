@@ -24,4 +24,8 @@ class Customer {
         $this->base = $base;
     }
 
+    public function setup() {
+
+    }
+
 }

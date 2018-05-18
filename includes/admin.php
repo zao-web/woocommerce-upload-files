@@ -23,4 +23,8 @@ class Admin {
     public function __construct( $base ) {
         $this->base = $base;
     }
+
+    public function setup() {
+
+    }
 }

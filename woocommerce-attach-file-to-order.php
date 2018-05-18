@@ -38,6 +38,7 @@ namespace Zao\WooCommerce\AttachFile;
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+require_once 'vendor/autoload.php';
 
 function autoload( $class_name ) {
 
@@ -190,6 +191,11 @@ final class WooCommerce_Attach_File_To_Order {
 		$this->customer_controller = new Customer( $this );
 		$this->integrations        = new Integrations( $this );
 
+		$this->admin_controller->setup();
+		$this->customer_controller->setup();
+		$this->integrations->setup();
+
+
 	} // END OF PLUGIN CLASSES FUNCTION
 
 	/**
@@ -202,7 +208,7 @@ final class WooCommerce_Attach_File_To_Order {
 	 * @since  0.0.0
 	 */
 	public function hooks() {
-		add_action( 'init', array( $this, 'init' ), 0 );
+		add_action( 'plugins_loaded', array( $this, 'init' ), 20 );
 	}
 
 	/**
@@ -296,6 +302,10 @@ final class WooCommerce_Attach_File_To_Order {
 	 * @return boolean True if requirements are met.
 	 */
 	public function meets_requirements() {
+
+		if ( ! class_exists( 'WC_Integration' ) ) {
+			$this->activation_errors[] = __( 'WooCommerce is not currently active, this plugin requires WooCommerce' );
+		}
 
 		// Do checks for required classes / functions or similar.
 		// Add detailed messages to $this->activation_errors array.
