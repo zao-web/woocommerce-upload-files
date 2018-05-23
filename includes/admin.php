@@ -26,5 +26,10 @@ class Admin {
 
     public function setup() {
 
+        add_filter( 'woocommerce_email_classes', function( $email_classes ) {
+            $email_classes['zao_wc_attach_file_admin_email'] = new Admin_Email();
+            return $email_classes;
+        } );
+
     }
 }

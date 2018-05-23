@@ -61,8 +61,8 @@ function autoload( $class_name ) {
 	 * separators with directory separators in the relative class name, replace
 	 * underscores with dashes, and append with .php
 	 */
-	$path = str_replace( array( '\\' ), array( '/' ), $relative_class );
-	$file = woocommerce_attach_file_to_order()->path . '/includes/' .  $path . '.php';
+	$path = strtolower( str_replace( array( '\\' ), array( '/' ), $relative_class ) );
+	$file = woocommerce_attach_file_to_order()->path . 'includes/' .  $path . '.php';
 
 	// if the file exists, require it
 	if ( file_exists( $file ) ) {
@@ -209,6 +209,7 @@ final class WooCommerce_Attach_File_To_Order {
 	 */
 	public function hooks() {
 		add_action( 'plugins_loaded', array( $this, 'init' ), 20 );
+		add_action( 'init', [ $this, 'process_uploaded_file' ] );
 	}
 
 	/**
@@ -253,6 +254,30 @@ final class WooCommerce_Attach_File_To_Order {
 
 		// Initialize plugin classes.
 		$this->plugin_classes();
+	}
+
+	public function enqueue_dropzone_scripts() {
+		wp_enqueue_script( 'dropzone'                , $this->url . 'assets/dropzone.js'    , array( 'jquery' ) );
+		wp_enqueue_script( 'woocommerce-upload-files', $this->url . 'assets/upload-files.js', array( 'dropzone' ) );
+		wp_enqueue_style(  'dropzone', $this->url . 'assets/dropzone.css' );
+	}
+
+	public function add_dropzone_shortcode( $args = array() ) {
+		$this->enqueue_dropzone_scripts();
+
+		do_action( 'wc_add_dropzone_shortcode', $args );
+		?>
+
+		<form action="<?php echo esc_url( wc_get_account_endpoint_url( 'upload-files' ) );?>" class="wc-dropzone dropzone" id="wc-dropzone-<?php echo esc_attr( $args['item_key'] ); ?>">
+			<?php foreach ( $args as $name => $value ) : ?>
+				<input type="hidden" name="<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( $value ); ?>" />
+			<?php endforeach; ?>
+		</form>
+		<?php
+	}
+
+	public function process_uploaded_file() {
+		do_action( 'zao_wc_attach_file_uploaded_file' );
 	}
 
 	/**
@@ -357,7 +382,7 @@ final class WooCommerce_Attach_File_To_Order {
 			case 'path':
 				return $this->$field;
 			default:
-				throw new Exception( 'Invalid ' . __CLASS__ . ' property: ' . $field );
+				throw new \Exception( 'Invalid ' . __CLASS__ . ' property: ' . $field );
 		}
 	}
 }
