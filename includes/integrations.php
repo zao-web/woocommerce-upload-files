@@ -39,6 +39,7 @@ class Integrations {
 
         if ( $this->integrate_with( 'dropbox' ) ) {
             $this->setup_dropbox();
+            $this->dropbox_init();
         }
     }
 
@@ -61,13 +62,15 @@ class Integrations {
         //Configure Dropbox service
         $this->dropbox = new Dropbox( $app );
 
+        return $this->dropbox;
+
+    }
+
+    public function dropbox_init() {
         // Add handlers for file upload
         add_action( 'zao_wc_attach_file_uploaded_file', [ $this, 'upload_file_to_dropbox' ] );
         add_action( 'wc_add_dropzone_shortcode'       , [ $this, 'populate_dropzone' ] );
         add_action( 'wp_ajax_wc_dropzone_remove_file' , [ $this, 'remove_file' ] );
-
-        return $this->dropbox;
-
     }
 
     public function remove_file() {
