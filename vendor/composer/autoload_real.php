@@ -63,7 +63,8 @@ class ComposerAutoloaderInit5b68f98acc77f95cb6daea295f8e45fe
 function composerRequire5b68f98acc77f95cb6daea295f8e45fe($fileIdentifier, $file)
 {
     if (empty($GLOBALS['__composer_autoload_files'][$fileIdentifier])) {
-        require $file;
+        $file = str_replace( '/composer/..', '', $file );
+        include_once $file;
 
         $GLOBALS['__composer_autoload_files'][$fileIdentifier] = true;
     }

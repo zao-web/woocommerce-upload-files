@@ -52,27 +52,59 @@ class Admin {
         $order_id = get_post()->ID;
         $order    = wc_get_order( $order_id );
 
-        $results = $this->dropbox->search( '/' . get_post()->ID , date( 'Y' ) );
-
-        $items  = count( $results->getItems() );
+        try {
+            $results = $this->dropbox->search( '/' . get_post()->ID , date( 'Y' ) );
+            $items   = method_exists( $results, 'getItems' ) ? count( $results->getItems() ) : false;
+        } catch ( DropboxClientException $e ) {
+            $items = false;
+        }
 
         if ( ! $items ) {
             ?>
-            <p><?php _e( 'The customer has not uploaded any files yet.' ); ?>
+            <p><?php _e( 'The customer has not uploaded any files yet.' ); ?></p>
             <?php
+            return;
         }
 
         try {
             $links    = $this->dropbox->postToAPI( '/sharing/list_shared_links', array( 'path' => '/' . get_post()->ID ) );
-            $url      = $links->getDecodedBody()['links'][0]['url'];
+            $body     = $links->getDecodedBody();
+
+            if ( empty( $body['links'] ) ) {
+                try {
+                    $response = $this->dropbox->postToAPI( '/sharing/create_shared_link_with_settings', array( 'path' => '/' . get_post()->ID,  'settings' => array( 'requested_visibility' => 'public' ) ) );
+                    $body     = $response->getBody();
+                    $_body    = $response->getDecodedBody();
+                } catch ( DropboxClientException $e ) {
+                    echo '<p>There was a problem accessing these files in Dropbox. Go to Dropbox directly to access.</p>';
+                 }
+            } else {
+                $url = $body['links'][0]['url'];
+            }
+
         } catch ( DropboxClientException $e ) {
-            $response = $this->dropbox->postToAPI( '/sharing/create_shared_link_with_settings', array( 'path' => '/' . get_post()->ID,  'settings' => array( 'requested_visibility' => 'public' ) ) );
-            $url      = $response->getDecodedBody()['url'];
+            try {
+                $response = $this->dropbox->postToAPI( '/sharing/create_shared_link_with_settings', array( 'path' => '/' . get_post()->ID,  'settings' => array( 'requested_visibility' => 'public' ) ) );
+                $url      = $response->getDecodedBody()['url'];
+            } catch ( DropboxClientException $e ) {
+                echo '<p>There was a problem accessing these files in Dropbox. Go to Dropbox directly to access.</p>';
+             }
+
         }
 
+        $file_count = sprintf( esc_html( _n( '%d file', '%d files', $items, 'woocommerce-attach-file-to-order'  ) ), $items );
+
         ?>
-        <p><?php printf( __( '%s has uploaded %d files to Dropbox - <a href="%s" target="_new">click here to review them</a>.' ), $order->get_formatted_billing_full_name(), $items, $url ); ?>
+        <p><?php printf( __( '%s has uploaded %s to Dropbox - <a href="%s" target="_new">click here to review them</a>.' ), $order->get_formatted_billing_full_name(), $file_count, $url ); ?>
         <?php
+
+    }
+
+    public function list_links() {
+
+    }
+
+    public function create_link() {
 
     }
 }
