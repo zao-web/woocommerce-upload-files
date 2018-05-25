@@ -280,6 +280,12 @@ final class WooCommerce_Attach_File_To_Order {
 		do_action( 'zao_wc_attach_file_uploaded_file' );
 	}
 
+
+	public function can_attach_file_to_item( $item ) {
+		return apply_filters( 'zao_wc_attach_can_attach_file_to_item', true, $item );
+	}
+
+
 	/**
 	 * Check if the plugin meets requirements and
 	 * disable it if they are not present.

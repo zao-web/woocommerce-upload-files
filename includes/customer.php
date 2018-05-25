@@ -192,7 +192,7 @@ class Customer {
 			$order_id = $this->order->get_id();
 
 			foreach ( $this->order->get_items() as $key => $item ) {
-				$is_custom = has_term( 'Custom', 'product_cat', $item->get_product()->get_parent_id() );
+				$is_custom = $this->base->can_attach_file_to_item( $item );
 
 				if ( $is_custom ) {
 					$this->base->add_dropzone_shortcode( array( 'order_id' => $order_id, 'item_key' => $key, 'name' => $item->get_name(), 'sku' => $item->get_product()->get_sku() ) );
@@ -201,5 +201,4 @@ class Customer {
 
 		}
 	}
-
 }
