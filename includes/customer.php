@@ -91,7 +91,14 @@ class Customer {
     public function add_upload_link_to_order_actions() {
 
 		add_filter( 'woocommerce_my_account_my_orders_actions', function( $actions, $order ) {
-			$order_id = $order->get_id();
+			$order_id           = $order->get_id();
+
+			$valid_custom_order = $this->is_order_custom( $order_id );
+
+			if ( ! $valid_custom_order ) {
+				return $actions;
+			}
+
 			$endpoint = self::$endpoint;
 
 			$url      = wc_get_account_endpoint_url( "{$endpoint}/{$order_id}" );
@@ -107,6 +114,12 @@ class Customer {
 
     public function add_upload_link_to_receipt_page() {
 		add_action( 'woocommerce_thankyou', function( $order_id ) {
+			$valid_custom_order = $this->is_order_custom( $order_id );
+
+			if ( ! $valid_custom_order ) {
+				return false;
+			}
+
 			$endpoint = self::$endpoint;
 			$url      = wc_get_account_endpoint_url( "{$endpoint}/{$order_id}" );
 
@@ -126,12 +139,40 @@ class Customer {
 
 			$endpoint = self::$endpoint;
 			$order_id = $order->get_id();
+
+			$valid_custom_order = $this->is_order_custom( $order_id );
+
+			if ( ! $valid_custom_order ) {
+				return false;
+			}
+
 			$url      = wc_get_account_endpoint_url( "{$endpoint}/{$order_id}" );
 			?>
 			<a href="<?php echo esc_url( $url ); ?>" class="button"><?php _e( 'Upload Your Files' ); ?></a>
 			<?php
 		}, 10, 4 );
-    }
+	}
+
+	public function is_order_custom( $order_id ) {
+		$is_custom = false;
+
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			return $is_custom;
+		}
+
+		foreach ( $order->get_items() as $item ) {
+			$can_attach = $this->base->can_attach_file_to_item( $item );
+
+			if ( $can_attach ) {
+				$is_custom = true;
+				break;
+			}
+		}
+
+		return $is_custom;
+	}
 
 	/**
 	 * Register new endpoint to use inside My Account page.
@@ -186,7 +227,7 @@ class Customer {
 		<?php
 		} else {
 			?>
-			<p><?php echo sprintf( __( 'Upload your file for your order, order #%s below. You can click to upload, or drag and drop it.' ), $this->order->get_id() ); ?></p>
+			<p><?php echo sprintf( __( 'Upload your file for your order, order #%s below. You can click to upload, or drag and drop it.' ), $this->order->get_order_number() ); ?></p>
 			<?php
 
 			$order_id = $this->order->get_id();
